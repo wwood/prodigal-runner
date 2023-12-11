@@ -1,0 +1,65 @@
+#!/usr/bin/env python3
+
+__author__ = "Ben Woodcroft"
+__copyright__ = "Copyright 2023"
+__credits__ = ["Ben Woodcroft"]
+__license__ = "GPL3+"
+__maintainer__ = "Ben Woodcroft"
+__email__ = "b.woodcroft near qut.edu.au"
+__status__ = "Development"
+__version__ = '0.0.1.dev'
+
+import os
+import sys
+import logging
+import re
+
+from bird_tool_utils import *
+from bird_tool_utils.people import *
+
+from singlem.biolib_lite.prodigal_biolib import Prodigal
+
+
+
+def main():
+    bird_argparser = BirdArgparser(
+        program='prodigal-runner',
+        authors=[BEN_NAME_AND_CENTRE_AND_EMAIL],
+        version=__version__,
+        raw_format=True)
+
+    run_description = 'run prodigial on a set of genomes, picking the correct translation table for each'
+    run_parser = bird_argparser.new_subparser('run', run_description)
+
+    run_parser_common_options = run_parser.add_argument_group(title='common options')
+    run_parser_common_options.add_argument(
+        '-i','--genomes',
+        help='FASTA file(s) to run prodigal on',
+        nargs='+',
+        required=True)
+    run_parser_common_options.add_argument(
+        '-t','--threads',
+        help='Number of threads to use',
+        type=int,
+        default=1)
+    run_parser_common_options.add_argument(
+        '-o','--output-directory',
+        help='Output directory',
+        required=True)
+
+    args = bird_argparser.parse_the_args()
+
+    logging.info("Prodigal-runner v{}".format(__version__))
+
+    if args.subparser_name == 'run':
+        runner = Prodigal(args.threads)
+        summary_stats = runner.run(args.genomes, args.output_directory)
+    else:
+        raise Exception("Programming error")
+
+    logging.info("Prodigal-runner done.")
+
+
+
+if __name__ == '__main__':
+    main()
